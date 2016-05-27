@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://getbootstrap.com/examples/justified-nav/justified-nav.css" rel="stylesheet">
+
+    <style>
+        .axis path {
+            fill: none;
+            stroke: #777;
+            shape-rendering: crispEdges;
+        }
+        .axis text {
+            font-family: Lato;
+            font-size: 13px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="jumbotron">
+
+            <svg id="visualisation" width="1000" height="500"></svg>
+            <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+            <script>
+			
+				// A very basic example of plotting a mathematical function in d3.js (in this case, the function y = ab^x)
+				// Adapted from jay3dec at https://github.com/jay3dec/MultiLineChart_D3/blob/master/index.html
+				// With inspiration from http://stackoverflow.com/questions/13849818/how-to-draw-a-exponential-function-y-abx-using-d3-js-axis-functionality
+				
+                function InitChart() {
+				
+					// Create an empty data array to store our datapoints at a later time
+					// a and b are variables of the equation y = ab^x
+					// so the equation being graphed here is y = 2^x
+					var data = [],
+						a = 1,
+						b = 2;
+					
+					// d3.js needs an array of x and y coordinates to graph
+					// This loop populates data[] with those points given y = ab^x
+					// max value for k is 1000, meaning you'll get 1000 datapoints covering x = 0 to x = 9.99, in increments of x = 0.01
+					for (var k = 0; k < 1000; k++) {
+						data.push({x: 0.01 * k, y: a * Math.pow(b, 0.01 * k)});
+					}
+					
+					// Will print to your console the last datapoint in the array so you can examine the output of the above equation
+					console.log( data[999] );
+					
+					
+					var vis = d3.select("#visualisation"),
+						WIDTH = 1000, // Width of your chart svg
+						HEIGHT = 500, // Height of your chart svg
+						MARGINS = {
+							top: 20,
+							right: 20,
+							bottom: 20,
+							left: 50
+						}, // Margins around your chart
+						// xScale makes a linear scale of domain x = 0 to x = 5, within the range pixels specified by left and right margins and the width
+						xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([0, 5]),
+						// yScale makes a linear scale of domain y = 0 to y = 10, within the range pixels specified by top and bottom margins and the height
+						yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, 10]),
+						// Creates x axis from the xScale we created
+						xAxis = d3.svg.axis()
+						.scale(xScale),
+						// Creates y axis from the yScale we created
+						yAxis = d3.svg.axis()
+						.scale(yScale)
+						.orient("left");
+					
+					// Now adding xAxis to the viz
+					vis.append("svg:g")
+						.attr("class", "x axis")
+						.attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
+						.call(xAxis);
+					// Now adding yAxis to the viz
+					vis.append("svg:g")
+						.attr("class", "y axis")
+						.attr("transform", "translate(" + (MARGINS.left) + ",0)")
+						.call(yAxis);
+						
+					// Creates a line function that converts datapoints in data[] to x and y coordinates that d3 can read
+					var lineGen = d3.svg.line()
+						// Assigns the x function to plot our line
+						.x(function(d) {
+							// Runs xScale to return x coordinate
+							return xScale(d.x);
+						})
+						// Assigns the y function to plot our line
+						.y(function(d) {
+							// Runs yScale to return y coordinate
+							return yScale(d.y);
+						})
+						// Sets interpolation mode, meaning how d3.js draws lines in-between points
+						.interpolate("basis");
+						
+					// Appends the svg:path element to viz with the following attributes
+					vis.append('svg:path')
+						.attr('d', lineGen(data))
+						.attr('stroke', 'green')
+						.attr('stroke-width', 2)
+						.attr('fill', 'none');
+				}
+				
+                InitChart();
+            </script>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
